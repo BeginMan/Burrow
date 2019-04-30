@@ -195,7 +195,7 @@ func (module *CachingEvaluator) evaluateConsumerStatus(clusterAndConsumer string
 			zap.String("consumer", consumer),
 			zap.String("status", protocol.StatusNotFound.String()),
 		)
-		return nil, &cacheError{StatusCode: 404, Reason: "cluster or consumer not found"}
+		return nil, &cacheError{StatusCode: 404, Reason: "> cluster or consumer not found"}
 	}
 
 	// From here out, we're going to return a non-error response, so prepare a status struct

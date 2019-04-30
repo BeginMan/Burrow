@@ -29,25 +29,25 @@ import (
 // KafkaClient is a consumer module which connects to a single Apache Kafka cluster and reads consumer group information
 // from the offsets topic in the cluster, which is typically __consumer_offsets. The messages in this topic are decoded
 // and the information is forwarded to the storage subsystem for use in evaluations.
+// KafkaClient 结构体
 type KafkaClient struct {
-	// App is a pointer to the application context. This stores the channel to the storage subsystem
+	// App是指向应用程序上下文的指针。 这会将channel存储到存储子系统
 	App *protocol.ApplicationContext
 
-	// Log is a logger that has been configured for this module to use. Normally, this means it has been set up with
-	// fields that are appropriate to identify this coordinator
+	// 日志
 	Log *zap.Logger
 
-	name           string
-	cluster        string
-	servers        []string
-	offsetsTopic   string
-	startLatest    bool
-	saramaConfig   *sarama.Config
-	groupWhitelist *regexp.Regexp
-	groupBlacklist *regexp.Regexp
+	name           string				// 名称
+	cluster        string				// 集群名称
+	servers        []string				// kafka地址
+	offsetsTopic   string				// 要消费的offset topic, 默认 __consumer_offsets
+	startLatest    bool					// 是否从最新的开始消费
+	saramaConfig   *sarama.Config		// 消费配置
+	groupWhitelist *regexp.Regexp		// 消费者组白名单
+	groupBlacklist *regexp.Regexp		// 消费者组黑名单
 
-	quitChannel chan struct{}
-	running     sync.WaitGroup
+	quitChannel chan struct{}			// 退出channel
+	running     sync.WaitGroup			// 是否正在运行
 }
 
 type offsetKey struct {
@@ -162,6 +162,7 @@ func (module *KafkaClient) Stop() error {
 	return nil
 }
 
+// 分区消费
 func (module *KafkaClient) partitionConsumer(consumer sarama.PartitionConsumer) {
 	defer module.running.Done()
 	defer consumer.AsyncClose()
@@ -182,6 +183,7 @@ func (module *KafkaClient) partitionConsumer(consumer sarama.PartitionConsumer) 
 	}
 }
 
+// kafka消费者, 消费module.offsetsTopic topic，默认是 __consumer_offsets
 func (module *KafkaClient) startKafkaConsumer(client helpers.SaramaClient) error {
 	// Create the consumer from the client
 	consumer, err := client.NewConsumerFromClient()
@@ -203,6 +205,7 @@ func (module *KafkaClient) startKafkaConsumer(client helpers.SaramaClient) error
 	}
 
 	// Default to bootstrapping the offsets topic, unless configured otherwise
+	// 设置消费方式
 	startFrom := sarama.OffsetOldest
 	if module.startLatest {
 		startFrom = sarama.OffsetNewest
@@ -213,6 +216,8 @@ func (module *KafkaClient) startKafkaConsumer(client helpers.SaramaClient) error
 		zap.String("topic", module.offsetsTopic),
 		zap.Int("count", len(partitions)),
 	)
+
+	// 每个分区启动一个消费 goroutine
 	for i, partition := range partitions {
 		pconsumer, err := consumer.ConsumePartition(module.offsetsTopic, partition, startFrom)
 		if err != nil {
@@ -230,6 +235,7 @@ func (module *KafkaClient) startKafkaConsumer(client helpers.SaramaClient) error
 	return nil
 }
 
+// 处理分区消费的消息
 func (module *KafkaClient) processConsumerOffsetsMessage(msg *sarama.ConsumerMessage) {
 	logger := module.Log.With(
 		zap.String("offset_topic", msg.Topic),

@@ -5,7 +5,7 @@ access-control-allow-origin="mysite.example.com"
 
 [logging]
 filename="logs/burrow.log"
-level="info"
+level="debug"
 maxsize=100
 maxbackups=30
 maxage=10
@@ -13,7 +13,7 @@ use-localtime=false
 use-compression=true
 
 [zookeeper]
-servers=[ "zkhost01.example.com:2181", "zkhost02.example.com:2181", "zkhost03.example.com:2181" ]
+servers=[ "localhost:2181" ]
 timeout=6
 root-path="/burrow"
 
@@ -23,7 +23,7 @@ kafka-version="0.10.0"
 
 [cluster.local]
 class-name="kafka"
-servers=[ "kafka01.example.com:10251", "kafka02.example.com:10251", "kafka03.example.com:10251" ]
+servers=[ "localhost:9092" ]
 client-profile="test"
 topic-refresh=120
 offset-refresh=30
@@ -31,7 +31,7 @@ offset-refresh=30
 [consumer.local]
 class-name="kafka"
 cluster="local"
-servers=[ "kafka01.example.com:10251", "kafka02.example.com:10251", "kafka03.example.com:10251" ]
+servers=[ "localhost:9092" ]
 client-profile="test"
 group-blacklist="^(console-consumer-|python-kafka-consumer-|quick-).*$"
 group-whitelist=""
@@ -39,7 +39,7 @@ group-whitelist=""
 [consumer.local_zk]
 class-name="kafka_zk"
 cluster="local"
-servers=[ "zk01.example.com:2181", "zk02.example.com:2181", "zk03.example.com:2181" ]
+servers=[ "localhost:2181" ]
 zookeeper-path="/kafka-cluster"
 zookeeper-timeout=30
 group-blacklist="^(console-consumer-|python-kafka-consumer-|quick-).*$"
@@ -55,15 +55,16 @@ intervals=15
 expire-group=604800
 min-distance=1
 
-[notifier.default]
-class-name="http"
-url-open="http://someservice.example.com:1467/v1/event"
-interval=60
-timeout=5
-keepalive=30
-extras={ api_key="REDACTED", app="burrow", tier="STG", fabric="mydc" }
-template-open="conf/default-http-post.tmpl"
-template-close="conf/default-http-delete.tmpl"
-method-close="DELETE"
-send-close=true
-threshold=1
+#
+#[notifier.default]
+#class-name="http"
+#url-open="http://someservice.example.com:1467/v1/event"
+#interval=60
+#timeout=5
+#keepalive=30
+#extras={ api_key="REDACTED", app="burrow", tier="STG", fabric="mydc" }
+#template-open="conf/default-http-post.tmpl"
+#template-close="conf/default-http-delete.tmpl"
+#method-close="DELETE"
+#send-close=true
+#threshold=1

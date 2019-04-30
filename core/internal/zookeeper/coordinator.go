@@ -12,6 +12,8 @@
 // The zookeeper subsystem provides a Zookeeper client that is common across all of Burrow, and can be used by other
 // subsystems to store metadata or coordinate operations between multiple Burrow instances. It is used primarily to
 // assure that only one Burrow instance is sending notifications at any time.
+
+// zookeeper组件给Burrow实例用的，用于存储元数据或coordinate操作
 package zookeeper
 
 import (

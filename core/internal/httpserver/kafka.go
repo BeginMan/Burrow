@@ -76,6 +76,7 @@ func getClientProfile(name string) httpResponseClientProfile {
 	}
 }
 
+// 从配置文件里获取集群信息
 func (hc *Coordinator) handleClusterDetail(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	// Get cluster config
 	configRoot := "cluster." + params.ByName("cluster")
@@ -204,7 +205,7 @@ func (hc *Coordinator) handleConsumerDetail(w http.ResponseWriter, r *http.Reque
 	response := <-request.Reply
 
 	if response == nil {
-		hc.writeErrorResponse(w, r, http.StatusNotFound, "cluster or consumer not found")
+		hc.writeErrorResponse(w, r, http.StatusNotFound, "Note: cluster or consumer not found")
 	} else {
 		requestInfo := makeRequestInfo(r)
 		hc.writeResponse(w, r, http.StatusOK, httpResponseConsumerDetail{
